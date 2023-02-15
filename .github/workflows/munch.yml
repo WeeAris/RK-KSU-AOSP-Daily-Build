@@ -103,11 +103,7 @@ jobs:
         name: ${{ env.FINAL_ZINAME }}
         path: image_output/*
         
-    - name: Upload Kernel Image Source Code Snapshot
-      uses: actions/upload-artifact@v3
-      with:
-        name: ${{ env.FINAL_ZINAME }}-SourceCode
-        path: android-kernel/*
+
     
           
 
