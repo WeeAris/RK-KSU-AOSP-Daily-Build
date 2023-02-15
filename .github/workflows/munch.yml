@@ -16,7 +16,6 @@ jobs:
         github-server-url: 'https://github.com'
         repository: Rohail33/Realking_xiaomi_sm8250
         ref: munch
-        submodules: recursive
         path: android-kernel
       
     - name: Setup Build Environment
