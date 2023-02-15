@@ -25,7 +25,8 @@ jobs:
         cd clang
         wget -q https://github.com/Mandi-Sa/clang/releases/download/amd64-kernel-arm-20230205/amd64-kernel-arm-20230205.7z -O clang.7z
         7za x clang.7z
-        cd ..
+        CLANG_DIR=`pwd`
+        echo "CLANG_DIR=$CLANG_DIR" >> $GITHUB_ENV
       
     - name: Setup KernelSU
       run: |
@@ -36,8 +37,8 @@ jobs:
     
     - name: Generate Kernel Configuration
       run: |
-        PATH=clang/bin:$PATH
         cd android-kernel
+        PATH=${{ env.CLANG_DIR }}/bin:$PATH
         DEVICE_NAME=Munch
         KERNEL_DEFCONFIG=vendor/munch_defconfig
         KERNEL_DIR=`pwd`
@@ -64,8 +65,8 @@ jobs:
         
     - name: Build Kernel
       run: |
-        PATH=clang/bin:$PATH
         cd android-kernel
+        PATH=${{ env.CLANG_DIR }}/bin:$PATH
         clang -v
         SUBARCH=arm64
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
