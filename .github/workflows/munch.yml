@@ -1,6 +1,9 @@
 name: Build AOSP Kernel for Munch
 
-on: [push]
+on: 
+  schedule:
+    - cron:  '0 20 * * *'
+  
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -58,9 +61,9 @@ jobs:
         ######################
         make CC=clang O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- NM=llvm-nm LLVM=1 LLVM_IAS=1 $KERNEL_DEFCONFIG 
         ######################
-        KERNEL_STRING="~RK-KSU//$IMAGE_VERSION-$KSU_VERSION-$IMAGE_CODE"
+        KERNEL_STRING="~RK-KSU//$IMAGE_VERSION-$KSU_VERSION-$IMAGE_CODE-Snapshot"
         sed -i '/CONFIG_LOCALVERSION=/ c  CONFIG_LOCALVERSION='"\"$KERNEL_STRING\""' ' out/.config
-        echo "ZIMAGE_NAME=RK-KSU-${IMAGE_VERSION}-${KSU_VERSION}-${DEVICE_NAME}-AOSP" >> $GITHUB_ENV
+        echo "ZIMAGE_NAME=RK-KSU-${IMAGE_VERSION}-${KSU_VERSION}-${DEVICE_NAME}-AOSP-Snapshot" >> $GITHUB_ENV
         
         
     - name: Build Kernel
@@ -91,13 +94,19 @@ jobs:
         mkdir ${{ env.KERNEL_DIR }}/image_output
         cp -fp tmp/tmp.zip ../image_output/${FINAL_ZINAME}.zip
         md5sum ../image_output/${FINAL_ZINAME}.zip >../image_output/${FINAL_ZINAME}.zip.md5sum
+        rm -rf out
         
     - name: Upload Kernel Image ZIP
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.FINAL_ZINAME }}
         path: image_output/*
-    
+        
+    - name: Upload Kernel Image Source Code Snapshot
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.FINAL_ZINAME }}-SourceCode
+        path: android-kernel/*
     
           
 
