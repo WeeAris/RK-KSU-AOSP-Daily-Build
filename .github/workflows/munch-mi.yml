@@ -71,7 +71,7 @@ jobs:
         cd android-kernel
         PATH=${{ env.CLANG_DIR }}/bin:$PATH
         clang -v
-        MAKE="./makeparallel"
+        #MAKE="./makeparallel"
         SUBARCH=arm64
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
         KBUILD_BUILD_HOST=GitHub-Action
