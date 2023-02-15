@@ -53,18 +53,17 @@ jobs:
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
         KBUILD_BUILD_HOST=GitHub-Action
         KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
-        ######################
-        IMAGE_VERSION=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/${KERNEL_DEFCONFIG} | awk -F'[/-]' '{print $3}' `
-        IMAGE_CODE=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/${KERNEL_DEFCONFIG} | awk -F'[/-]' '{print $4}' | sed 's/"//' `
+
         cd $KERNEL_DIR/KernelSU
         KSU_VERSION=$((10000+200+`git rev-list --count HEAD`))
         cd $KERNEL_DIR
-        ######################
+
         make CC=clang O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- NM=llvm-nm LLVM=1 LLVM_IAS=1 $KERNEL_DEFCONFIG 
-        ######################
-        KERNEL_STRING="~RK-KSU//$IMAGE_VERSION-$KSU_VERSION-$IMAGE_CODE-Snapshot"
-        sed -i '/CONFIG_LOCALVERSION=/ c  CONFIG_LOCALVERSION='"\"$KERNEL_STRING\""' ' out/.config
-        echo "ZIMAGE_NAME=RK-KSU-${IMAGE_VERSION}-${KSU_VERSION}-${DEVICE_NAME}-AOSP-Snapshot" >> $GITHUB_ENV
+        
+        sed -i "/RealKing/{s/-/-${KSU_VERSION}-/}" out/.config
+        sed -i "/RealKing/{s/RealKing/RK-KSU/}" out/.config
+        KERNEL_NAME=`grep "RK-KSU" out/.config | sed 's|//|-|' | awk -F\" '{print $2}'`
+        echo "ZIMAGE_NAME=${KERNEL_NAME}-${DEVICE_NAME}-AOSP-Snapshot" >> $GITHUB_ENV
         
         
     - name: Build Kernel
