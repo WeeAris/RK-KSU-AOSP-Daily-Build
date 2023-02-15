@@ -54,23 +54,15 @@ jobs:
         KBUILD_BUILD_HOST=GitHub-Action
         KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
         ######################
-        #IMAGE_VERSION=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/${KERNEL_DEFCONFIG} | awk -F'[/-]' '{print $3}' `
-        #IMAGE_CODE=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/${KERNEL_DEFCONFIG} | awk -F'[/-]' '{print $4}' | sed 's/"//' `
         cd $KERNEL_DIR/KernelSU
         KSU_VERSION=$((10000+200+`git rev-list --count HEAD`))
         cd $KERNEL_DIR
         ######################
         make CC=clang O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- NM=llvm-nm  OBJDUMP=llvm-objdump STRIP=llvm-strip $KERNEL_DEFCONFIG 
         ######################
-        echo "#######Before########"
-        grep 'CONFIG_LOCALVERSION=' out/.config
-        echo "###############"
-        #KERNEL_STRING="~RK-KSU//$IMAGE_VERSION-$KSU_VERSION-$IMAGE_CODE-Snapshot"
-        sed -i "/RealKing/{s/-/$KSU_VERSION/}" out/.config
+        sed -i "/RealKing/{s/-/-${KSU_VERSION}-/}" out/.config
         sed -i "/RealKing/{s/RealKing/RK-KSU/}" out/.config
-        echo "#######After########"
-        grep 'CONFIG_LOCALVERSION=' out/.config
-        echo "###############"
+
         echo "ZIMAGE_NAME=RK-KSU-${IMAGE_VERSION}-${KSU_VERSION}-${DEVICE_NAME}-MIUI-Snapshot" >> $GITHUB_ENV
         
         
