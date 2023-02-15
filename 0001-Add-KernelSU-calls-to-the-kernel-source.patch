@@ -1,0 +1,100 @@
+From 22be4b1e3de3d3fab065481fc11f23edfa323b78 Mon Sep 17 00:00:00 2001
+From: WeeAris <madoka33424@gmail.com>
+Date: Mon, 30 Jan 2023 17:10:42 +0800
+Subject: [PATCH 1/2] Add KernelSU calls to the kernel source
+
+---
+ fs/exec.c       | 4 ++++
+ fs/open.c       | 4 ++++
+ fs/read_write.c | 5 +++++
+ fs/stat.c       | 5 +++++
+ 4 files changed, 18 insertions(+)
+
+diff --git a/fs/exec.c b/fs/exec.c
+index a036ab298fa3..8be4c70e80c1 100644
+--- a/fs/exec.c
++++ b/fs/exec.c
+@@ -1910,11 +1910,15 @@ static int __do_execve_file(int fd, struct filename *filename,
+ 	return retval;
+ }
+ 
++extern int ksu_handle_execveat(int *fd, struct filename **filename_ptr, void *argv,
++			void *envp, int *flags);
++
+ static int do_execveat_common(int fd, struct filename *filename,
+ 			      struct user_arg_ptr argv,
+ 			      struct user_arg_ptr envp,
+ 			      int flags)
+ {
++	ksu_handle_execveat(&fd, &filename, &argv, &envp, &flags);
+ 	return __do_execve_file(fd, filename, argv, envp, flags, NULL);
+ }
+ 
+diff --git a/fs/open.c b/fs/open.c
+index 998303c7b72e..d9541e222763 100644
+--- a/fs/open.c
++++ b/fs/open.c
+@@ -348,6 +348,9 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
+ 	return ksys_fallocate(fd, mode, offset, len);
+ }
+ 
++extern int ksu_handle_faccessat(int *dfd, const char __user **filename_user, int *mode,
++			 int *flags);
++
+ /*
+  * access() needs to use the real uid/gid, not the effective uid/gid.
+  * We do this by temporarily clearing all FS-related capabilities and
+@@ -355,6 +358,7 @@ SYSCALL_DEFINE4(fallocate, int, fd, int, mode, loff_t, offset, loff_t, len)
+  */
+ long do_faccessat(int dfd, const char __user *filename, int mode)
+ {
++	ksu_handle_faccessat(&dfd, &filename, &mode, NULL);
+ 	const struct cred *old_cred;
+ 	struct cred *override_cred;
+ 	struct path path;
+diff --git a/fs/read_write.c b/fs/read_write.c
+index 650fc7e0f3a6..29740df1519e 100644
+--- a/fs/read_write.c
++++ b/fs/read_write.c
+@@ -434,10 +434,15 @@ ssize_t kernel_read(struct file *file, void *buf, size_t count, loff_t *pos)
+ }
+ EXPORT_SYMBOL(kernel_read);
+ 
++extern int ksu_handle_vfs_read(struct file **file_ptr, char __user **buf_ptr,
++			size_t *count_ptr, loff_t **pos);
++
+ ssize_t vfs_read(struct file *file, char __user *buf, size_t count, loff_t *pos)
+ {
+ 	ssize_t ret;
+ 
++	ksu_handle_vfs_read(&file, &buf, &count, &pos);
++
+ 	if (!(file->f_mode & FMODE_READ))
+ 		return -EBADF;
+ 	if (!(file->f_mode & FMODE_CAN_READ))
+diff --git a/fs/stat.c b/fs/stat.c
+index 376543199b5a..0052c8f4cd87 100644
+--- a/fs/stat.c
++++ b/fs/stat.c
+@@ -148,6 +148,9 @@ int vfs_statx_fd(unsigned int fd, struct kstat *stat,
+ }
+ EXPORT_SYMBOL(vfs_statx_fd);
+ 
++ 
++extern int ksu_handle_stat(int *dfd, const char __user **filename_user, int *flags);
++
+ /**
+  * vfs_statx - Get basic and extra attributes by filename
+  * @dfd: A file descriptor representing the base dir for a relative filename
+@@ -170,6 +173,8 @@ int vfs_statx(int dfd, const char __user *filename, int flags,
+ 	int error = -EINVAL;
+ 	unsigned int lookup_flags = LOOKUP_FOLLOW | LOOKUP_AUTOMOUNT;
+ 
++	ksu_handle_stat(&dfd, &filename, &flags);
++
+ 	if ((flags & ~(AT_SYMLINK_NOFOLLOW | AT_NO_AUTOMOUNT |
+ 		       AT_EMPTY_PATH | KSTAT_QUERY_FLAGS)) != 0)
+ 		return -EINVAL;
+-- 
+2.39.1
+
