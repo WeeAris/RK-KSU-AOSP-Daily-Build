@@ -36,13 +36,13 @@ jobs:
     
     - name: Generate Kernel Configuration
       run: |
+        PATH=clang/bin:$PATH
         cd android-kernel
         DEVICE_NAME=Munch
         KERNEL_DEFCONFIG=vendor/munch_defconfig
         KERNEL_DIR=`pwd`
         echo "KERNEL_DIR=${KERNEL_DIR}" >> $GITHUB_ENV
         echo "ZIMAGE_DIR="${KERNEL_DIR}/out/arch/arm64/boot"" >> $GITHUB_ENV
-        PATH=../clang/bin:$PATH
         ARCH=arm64
         SUBARCH=arm64
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
@@ -64,8 +64,8 @@ jobs:
         
     - name: Build Kernel
       run: |
+        PATH=clang/bin:$PATH
         cd android-kernel
-        PATH=../clang/bin:$PATH
         clang -v
         SUBARCH=arm64
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
