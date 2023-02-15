@@ -62,8 +62,14 @@ jobs:
         ######################
         make CC=clang O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- NM=llvm-nm  OBJDUMP=llvm-objdump STRIP=llvm-strip $KERNEL_DEFCONFIG 
         ######################
+        echo "#######Before########"
+        grep 'CONFIG_LOCALVERSION=' out/.config
+        echo "###############"
         KERNEL_STRING="~RK-KSU//$IMAGE_VERSION-$KSU_VERSION-$IMAGE_CODE-Snapshot"
         sed -i '/CONFIG_LOCALVERSION=/ c  CONFIG_LOCALVERSION='"\"$KERNEL_STRING\""' ' out/.config
+        echo "#######After########"
+        grep 'CONFIG_LOCALVERSION=' out/.config
+        echo "###############"
         echo "ZIMAGE_NAME=RK-KSU-${IMAGE_VERSION}-${KSU_VERSION}-${DEVICE_NAME}-MIUI-Snapshot" >> $GITHUB_ENV
         
         
