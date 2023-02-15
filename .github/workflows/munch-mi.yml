@@ -62,8 +62,8 @@ jobs:
         ######################
         sed -i "/RealKing/{s/-/-${KSU_VERSION}-/}" out/.config
         sed -i "/RealKing/{s/RealKing/RK-KSU/}" out/.config
-
-        echo "ZIMAGE_NAME=RK-KSU-${IMAGE_VERSION}-${KSU_VERSION}-${DEVICE_NAME}-MIUI-Snapshot" >> $GITHUB_ENV
+        KERNEL_NAME=`grep "RK-KSU" out/.config | sed 's|//|-|' | awk -F\" '{print $2}'`
+        echo "ZIMAGE_NAME=${KERNEL_NAME}-${DEVICE_NAME}-MIUI-Snapshot" >> $GITHUB_ENV
         
         
     - name: Build Kernel
