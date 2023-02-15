@@ -44,7 +44,7 @@ jobs:
         cd android-kernel
         PATH=${{ env.CLANG_DIR }}/bin:$PATH
         DEVICE_NAME=Alioth
-        KERNEL_DEFCONFIG=vendor/munch_defconfig
+        KERNEL_DEFCONFIG=vendor/alioth_defconfig
         KERNEL_DIR=`pwd`
         echo "KERNEL_DIR=${KERNEL_DIR}" >> $GITHUB_ENV
         echo "ZIMAGE_DIR="${KERNEL_DIR}/out/arch/arm64/boot"" >> $GITHUB_ENV
@@ -54,8 +54,8 @@ jobs:
         KBUILD_BUILD_HOST=GitHub-Action
         KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
         ######################
-        IMAGE_VERSION=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/vendor/munch_defconfig | awk -F'[/-]' '{print $3}' `
-        IMAGE_CODE=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/vendor/munch_defconfig | awk -F'[/-]' '{print $4}' | sed 's/"//' `
+        IMAGE_VERSION=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/${KERNEL_DEFCONFIG} | awk -F'[/-]' '{print $3}' `
+        IMAGE_CODE=`grep "CONFIG_LOCALVERSION=" arch/arm64/configs/${KERNEL_DEFCONFIG} | awk -F'[/-]' '{print $4}' | sed 's/"//' `
         cd $KERNEL_DIR/KernelSU
         KSU_VERSION=$((10000+200+`git rev-list --count HEAD`))
         cd $KERNEL_DIR
