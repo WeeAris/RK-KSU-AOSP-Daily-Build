@@ -3,6 +3,8 @@ name: Build AOSP Kernel for Munch
 on: 
   schedule:
     - cron:  '0 20 * * *'
+  push:
+    branches: main
   
 jobs:
   build:
