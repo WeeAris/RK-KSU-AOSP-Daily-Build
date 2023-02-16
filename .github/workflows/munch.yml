@@ -2,7 +2,7 @@ name: Build AOSP Kernel for Munch
 
 on: 
   schedule:
-    - cron:  '0 20 * * *'
+    - cron:  '0 22 * * *'
   workflow_dispatch:
 
   
