@@ -1,20 +1,41 @@
-From 22be4b1e3de3d3fab065481fc11f23edfa323b78 Mon Sep 17 00:00:00 2001
+From 5aaca37826ca98dc128dabd9a09fcd456f07ce2e Mon Sep 17 00:00:00 2001
 From: WeeAris <madoka33424@gmail.com>
-Date: Mon, 30 Jan 2023 17:10:42 +0800
-Subject: [PATCH 1/2] Add KernelSU calls to the kernel source
+Date: Fri, 17 Feb 2023 14:58:18 +0800
+Subject: [PATCH] Add KernelSU Syscall
 
 ---
- fs/exec.c       | 4 ++++
- fs/open.c       | 4 ++++
- fs/read_write.c | 5 +++++
- fs/stat.c       | 5 +++++
- 4 files changed, 18 insertions(+)
+ drivers/input/input.c | 5 ++++-
+ fs/exec.c             | 4 ++++
+ fs/open.c             | 4 ++++
+ fs/read_write.c       | 5 +++++
+ fs/stat.c             | 5 +++++
+ 5 files changed, 22 insertions(+), 1 deletion(-)
 
+diff --git a/drivers/input/input.c b/drivers/input/input.c
+index 159dd87b93b0..18f7f24b798b 100644
+--- a/drivers/input/input.c
++++ b/drivers/input/input.c
+@@ -378,11 +378,14 @@ static int input_get_disposition(struct input_dev *dev,
+ 	return disposition;
+ }
+ 
++extern int ksu_handle_input_handle_event(unsigned int *type, unsigned int *code, int *value);
++
+ static void input_handle_event(struct input_dev *dev,
+ 			       unsigned int type, unsigned int code, int value)
+ {
+ 	int disposition = input_get_disposition(dev, type, code, &value);
+-
++	ksu_handle_input_handle_event(&type, &code, &value);
++	
+ 	if (disposition != INPUT_IGNORE_EVENT && type != EV_SYN)
+ 		add_input_randomness(type, code, value);
+ 
 diff --git a/fs/exec.c b/fs/exec.c
-index a036ab298fa3..8be4c70e80c1 100644
+index 910ce4619aa0..82cbd1cbd5b9 100644
 --- a/fs/exec.c
 +++ b/fs/exec.c
-@@ -1910,11 +1910,15 @@ static int __do_execve_file(int fd, struct filename *filename,
+@@ -1912,11 +1912,15 @@ static int __do_execve_file(int fd, struct filename *filename,
  	return retval;
  }
  
@@ -96,5 +117,5 @@ index 376543199b5a..0052c8f4cd87 100644
  		       AT_EMPTY_PATH | KSTAT_QUERY_FLAGS)) != 0)
  		return -EINVAL;
 -- 
-2.39.1
+2.39.2
 
