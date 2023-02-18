@@ -114,13 +114,13 @@ jobs:
         
         echo "FINAL_ZINAME=$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip" >> $GITHUB_ENV
         
-        echo "FINAL_IMAGE=$OUT/$ANYKERNEL_PATH/$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip" >> $GITHUB_ENV
+        #echo "FINAL_IMAGE=$OUT/$ANYKERNEL_PATH/$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip" >> $GITHUB_ENV
         
     - name: Upload Kernel Image ZIP
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.FINAL_ZINAME }}
-        path: ${{ env.FINAL_IMAGE }}
+        path: out/AnyKernel3-picasso
         
 
     
