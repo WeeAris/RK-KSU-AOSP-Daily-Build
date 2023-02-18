@@ -1,0 +1,127 @@
+name: Build Driftwood Kernel for Picasso
+
+on: 
+  schedule:
+    - cron:  '0 22 * * 5'
+  workflow_dispatch:
+
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Kernel Source Code
+      uses: actions/checkout@v3
+      with:
+        github-server-url: 'https://github.com'
+        repository: WeeAris/Driftwood_kernel_xiaomi_sm7250
+        ref: android-4.19-standalone
+        path: android-kernel
+      
+    - name: Setup Build Environment
+      run: |
+        sudo apt-get update
+        sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses5 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig p7zip-full
+    
+    - name: Download Clang Toolchain
+      run: |
+        mkdir clang
+        cd clang
+        wget -q https://github.com/Mandi-Sa/clang/releases/download/amd64-kernel-arm-20230205/amd64-kernel-arm-20230205.7z -O clang.7z
+        7za x clang.7z
+        CLANG_DIR=`pwd`
+        echo "CLANG_DIR=$CLANG_DIR" >> $GITHUB_ENV
+      
+    - name: Setup KernelSU
+      run: |
+        cd android-kernel
+        rm -rf drivers/kernelsu
+        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+        
+    - name: Build Kernel
+      run: |
+        PATH=${{ env.CLANG_DIR }}/bin:$PATH
+        clang -v
+        LOCAL_VERSION_NUMBER=v2.0.0
+        
+        ARCH=arm64;
+        CC=clang;
+        CLANG_TRIPLE=aarch64-linux-gnu-;
+        CROSS_COMPILE=aarch64-linux-gnu-;
+        CROSS_COMPILE_COMPAT=arm-linux-gnueabi-;
+        THREAD=$(nproc --all);
+        CC_ADDITION_FLAGS="OBJDUMP=llvm-objdump LLVM_IAS=1 LLVM=1";
+        OUT="../out";
+
+        TARGET_KERNEL_FILE=arch/arm64/boot/Image;
+        TARGET_KERNEL_DTB=arch/arm64/boot/dtb;
+        TARGET_KERNEL_DTBO=arch/arm64/boot/dtbo.img
+        TARGET_KERNEL_NAME=Driftwood-Kernel;
+        TARGET_KERNEL_MOD_VERSION=$(make kernelversion)-$LOCAL_VERSION_NUMBER;
+        
+        DEFCONFIG_PATH=arch/arm64/configs
+        DEFCONFIG_NAME=vendor/picasso_user_defconfig;
+        
+        START_SEC=$(TZ=Asia/Shanghai date +%s);
+        CURRENT_TIME=$(TZ=Asia/Shanghai date '+%Y-%m%d%H%M');
+        
+        ANYKERNEL_URL=https://codeload.github.com/EndCredits/AnyKernel3/zip/refs/heads/picasso;
+        ANYKERNEL_PATH=AnyKernel3-picasso;
+        ANYKERNEL_FILE=anykernel.zip;
+        
+        echo "------------------------------";
+        echo " Building Kernel Defconfig..";
+        echo "------------------------------";
+    
+        make CC=$CC ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE CROSS_COMPILE_COMPAT=$CROSS_COMPILE_COMPAT CLANG_TRIPLE=$CLANG_TRIPLE $CC_ADDITION_FLAGS O=$OUT -j$THREAD $DEFCONFIG_NAME;
+ 
+        echo "------------------------------";
+        echo " Building Kernel ...........";
+        echo "------------------------------";
+    
+        make CC=$CC ARCH=$ARCH CROSS_COMPILE=$CROSS_COMPILE CROSS_COMPILE_COMPAT=$CROSS_COMPILE_COMPAT CLANG_TRIPLE=$CLANG_TRIPLE $CC_ADDITION_FLAGS O=$OUT -j$THREAD;
+        END_SEC=$(TZ=Asia/Shanghai date +%s);
+        COST_SEC=$[ $END_SEC-$START_SEC ];
+        echo "Kernel Build Costed $(($COST_SEC/60))min $(($COST_SEC%60))s"
+        
+        find $OUT/arch/arm64/boot/dts/vendor/qcom -name '*.dtb' -exec cat {} + > $OUT/arch/arm64/boot/dtb;
+        
+        echo "------------------------------";
+        echo " Generating Flashable Kernel";
+        echo "------------------------------";
+    
+        cd $OUT;
+        
+        echo ' Getting AnyKernel ';
+        curl $ANYKERNEL_URL -o $ANYKERNEL_FILE;
+    
+        unzip -o $ANYKERNEL_FILE;
+    
+        echo ' Removing old package file ';
+        rm -rf $ANYKERNEL_PATH/$TARGET_KERNEL_NAME*;
+    
+        echo ' Copying Kernel File '; 
+        cp -r $TARGET_KERNEL_FILE $ANYKERNEL_PATH/;
+        cp -r $TARGET_KERNEL_DTB $ANYKERNEL_PATH/;
+        cp -r $TARGET_KERNEL_DTBO $ANYKERNEL_PATH/;
+    
+        echo ' Packaging flashable Kernel ';
+        cd $ANYKERNEL_PATH;
+        zip -q -r $TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip *;
+    
+        echo " Target File:  $OUT/$ANYKERNEL_PATH/$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip ";
+        
+        echo "FINAL_ZINAME=$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip" >> $GITHUB_ENV
+        
+        echo "FINAL_IMAGE=$OUT/$ANYKERNEL_PATH/$TARGET_KERNEL_NAME-$CURRENT_TIME-$TARGET_KERNEL_MOD_VERSION.zip" >> $GITHUB_ENV
+        
+    - name: Upload Kernel Image ZIP
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ env.FINAL_ZINAME }}
+        path: ${{ env.FINAL_IMAGE }}
+        
+
+    
+          
+
