@@ -37,7 +37,7 @@ jobs:
         cd android-kernel
         git submodule init
         git submodule update
-        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+        #curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
         
     - name: Build Kernel
       run: |
