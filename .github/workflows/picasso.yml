@@ -120,7 +120,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.FINAL_ZINAME }}
-        path: out/AnyKernel3-picasso
+        path: out/AnyKernel3-picasso/Driftwood*
         
 
     
