@@ -38,7 +38,7 @@ jobs:
         git submodule init
         cd KernelSU
         git submodule update --remote --merge
-        file../drivers/kernelsu
+        file ../drivers/kernelsu
         
     - name: Build Kernel
       run: |
