@@ -16,7 +16,6 @@ jobs:
         github-server-url: 'https://github.com'
         repository: EndCredits/kernel_xiaomi_sm7250
         ref: android-4.19-standalone
-        submodules: 'true'
         path: android-kernel
       
     - name: Setup Build Environment
@@ -36,15 +35,10 @@ jobs:
     - name: Setup KernelSU
       run: |
         cd android-kernel
-        #git submodule init
-        #git submodule update
-        #cd KernelSU 
-        #git switch main
-        #git pull
-        #cd ..
-        #git submodule update --remote --merge
-        #rm -rf drivers/kernelsu
-        #ln -sf "KernelSU/kernel" "drivers/kernelsu"
+        git submodule init
+        cd KernelSU
+        git submodule update --remote --merge
+        file../drivers/kernelsu
         
     - name: Build Kernel
       run: |
