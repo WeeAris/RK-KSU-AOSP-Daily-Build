@@ -40,7 +40,9 @@ jobs:
         cd KernelSU 
         git switch main
         git pull
-        #curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+        cd ..
+        rm -rf drivers/kernelsu
+        ln -sf "KernelSU/kernel" "drivers/kernelsu"
         
     - name: Build Kernel
       run: |
