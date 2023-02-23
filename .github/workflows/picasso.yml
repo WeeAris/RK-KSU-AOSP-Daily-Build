@@ -38,6 +38,7 @@ jobs:
         git submodule init
         git submodule update
         cd KernelSU 
+        git switch main
         git pull
         #curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
         
