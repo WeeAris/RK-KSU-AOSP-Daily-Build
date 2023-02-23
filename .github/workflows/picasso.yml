@@ -36,13 +36,14 @@ jobs:
       run: |
         cd android-kernel
         git submodule init
-        git submodule update
+        #git submodule update
         cd KernelSU 
         git switch main
-        git pull
+        #git pull
         cd ..
-        rm -rf drivers/kernelsu
-        ln -sf "KernelSU/kernel" "drivers/kernelsu"
+        git submodule update --remote --merge
+        #rm -rf drivers/kernelsu
+        #ln -sf "KernelSU/kernel" "drivers/kernelsu"
         
     - name: Build Kernel
       run: |
