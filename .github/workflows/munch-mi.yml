@@ -22,14 +22,13 @@ jobs:
     - name: Setup Build Environment
       run: |
         sudo apt-get update
-        sudo apt-get install git-core gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses5 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig python-is-python3 python2 cpio p7zip-full
+        sudo apt-get install git-core git-lfs gnupg flex bison build-essential zip curl zlib1g-dev gcc-multilib g++-multilib libc6-dev-i386 libncurses5 lib32ncurses5-dev x11proto-core-dev libx11-dev lib32z1-dev libgl1-mesa-dev libxml2-utils xsltproc unzip fontconfig python-is-python3 python2 cpio p7zip-full
     
     - name: Download Clang Toolchain
       run: |
-        mkdir clang
+        git lfs clone -b amd64-kernel-arm --depth=1 https://codeberg.org/Mandi-Sa/clang.git clang
         cd clang
-        wget -q https://github.com/Mandi-Sa/clang/releases/download/amd64-kernel-arm-20230205/amd64-kernel-arm-20230205.7z -O clang.7z
-        7za x clang.7z
+        chmod -R +x ./
         CLANG_DIR=`pwd`
         echo "CLANG_DIR=$CLANG_DIR" >> $GITHUB_ENV
       
