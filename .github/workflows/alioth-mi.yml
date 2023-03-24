@@ -19,7 +19,7 @@ jobs:
       with:
         github-server-url: 'https://github.com'
         repository: Rohail33/RealKing-kernel-SM8250
-        ref: 12.1-alioth
+        ref: alioth
         path: android-kernel
       
     - name: Setup Build Environment
