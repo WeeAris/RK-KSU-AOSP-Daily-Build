@@ -65,7 +65,7 @@ jobs:
         KERNEL_STRING="~RK-KSU//$IMAGE_VERSION-$KSU_VERSION-$IMAGE_CODE-Snapshot"
         sed -i '/CONFIG_LOCALVERSION=/ c  CONFIG_LOCALVERSION='"\"$KERNEL_STRING\""' ' out/.config
         echo "ZIMAGE_NAME=RK-KSU-${IMAGE_VERSION}-${KSU_VERSION}-${DEVICE_NAME}-AOSP-Snapshot" >> $GITHUB_ENV
-        
+        sed -i 's/# CONFIG_SECCOMP is not set/CONFIG_SECCOMP=y/' ./out/.config
         
     - name: Build Kernel
       run: |

@@ -65,6 +65,7 @@ jobs:
         sed -i "/RealKing/{s/RealKing/RK-KSU/}" out/.config
         KERNEL_NAME=`grep "RK-KSU" out/.config | sed 's|//|-|' | awk -F\" '{print $2}'`
         echo "ZIMAGE_NAME=${KERNEL_NAME}-${DEVICE_NAME}-MIUI-Snapshot" >> $GITHUB_ENV
+        sed -i 's/# CONFIG_SECCOMP is not set/CONFIG_SECCOMP=y/' ./out/.config
         
         
     - name: Build Kernel
