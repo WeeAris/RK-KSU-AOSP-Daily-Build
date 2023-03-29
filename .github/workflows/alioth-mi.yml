@@ -48,7 +48,7 @@ jobs:
         cd android-kernel
         PATH=${{ env.CLANG_DIR }}/bin:$PATH
         DEVICE_NAME=Alioth
-        KERNEL_DEFCONFIG=vendor/alioth_defconfig
+        KERNEL_DEFCONFIG=alioth_defconfig
         KERNEL_DIR=`pwd`
         echo "KERNEL_DIR=${KERNEL_DIR}" >> $GITHUB_ENV
         echo "ZIMAGE_DIR="${KERNEL_DIR}/out/arch/arm64/boot"" >> $GITHUB_ENV
