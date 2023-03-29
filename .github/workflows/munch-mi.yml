@@ -47,7 +47,7 @@ jobs:
         cd android-kernel
         PATH=${{ env.CLANG_DIR }}/bin:$PATH
         DEVICE_NAME=Munch
-        KERNEL_DEFCONFIG=vendor/munch_defconfig
+        KERNEL_DEFCONFIG=munch_defconfig
         KERNEL_DIR=`pwd`
         echo "KERNEL_DIR=${KERNEL_DIR}" >> $GITHUB_ENV
         echo "ZIMAGE_DIR="${KERNEL_DIR}/out/arch/arm64/boot"" >> $GITHUB_ENV
