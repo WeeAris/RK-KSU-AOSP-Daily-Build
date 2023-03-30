@@ -1,25 +1,75 @@
-name: Build MIUI Kernel for Munch
+name: Realking MIUI Kernel Build
 
-on: 
-  schedule:
-    - cron:  '0 22 * * 1,3,5'
+on:
   workflow_dispatch:
-  push:
-    branches: [ "main" ]
-    paths: 
-      - '.github/workflows/munch-mi.yml'
-
+  workflow_call:
+    inputs:
+      IS_RELEASE:
+        required: true
+        default: true
+        type: boolean
+      DEVICE_CODE:
+        required: true
+        default: 'munch'
+        type: string
+      USE_KERNELSU:
+        required: true
+        default: true
+        type: boolean
+      CLANG_ARGS:
+        required: false
+        default: 'NM=llvm-nm LLVM=1 LLVM_IAS=1'
+        type: string
+      USE_CACHE:
+        required: false
+        type: boolean
+        default: true
   
 jobs:
   build:
+    name: MIUI ${{ inputs.DEVICE_CODE }}
     runs-on: ubuntu-latest
     steps:
+    - name: Setup Configuration
+      run: |
+        if [ ${{ inputs.IS_RELEASE }} = true ] ; then
+          echo "SOURCE_REPO=WeeAris/Realking_imm_kernel_sm8250" >> $GITHUB_ENV
+          
+          if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
+            echo "BRANCH_NAME=alioth-imm" >> $GITHUB_ENV
+            echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
+            echo "DEF_CONFIG=alioth_defconfig" >> $GITHUB_ENV
+          elif [ ${{ inputs.DEVICE_CODE }} = munch ] ; then
+            echo "BRANCH_NAME=munch-imm" >> $GITHUB_ENV
+            echo "DEVICE_NAME=Munch" >> $GITHUB_ENV
+            echo "DEF_CONFIG=munch_defconfig" >> $GITHUB_ENV
+          elif [ ${{ inputs.DEVICE_CODE }} = apollo ] ; then
+            echo "BRANCH_NAME=apollo-imm" >> $GITHUB_ENV
+            echo "DEVICE_NAME=Apollo" >> $GITHUB_ENV
+            echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
+          fi
+        else
+          echo "SOURCE_REPO=Rohail33/Realking_kernel_sm8250" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${{ inputs.DEVICE_CODE }}" >> $GITHUB_ENV
+          if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
+            echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
+            echo "DEF_CONFIG=alioth_defconfig" >> $GITHUB_ENV
+          elif [ ${{ inputs.DEVICE_CODE }} = munch ] ; then
+            echo "DEVICE_NAME=Munch" >> $GITHUB_ENV
+            echo "DEF_CONFIG=munch_defconfig" >> $GITHUB_ENV
+          elif [ ${{ inputs.DEVICE_CODE }} = apollo ] ; then
+            echo "DEVICE_NAME=Apollo" >> $GITHUB_ENV
+            echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
+          fi
+        fi
+        
+
     - name: Checkout Kernel Source Code
       uses: actions/checkout@v3
       with:
         github-server-url: 'https://github.com'
-        repository: Rohail33/Realking_kernel_sm8250
-        ref: munch
+        repository: ${{ env.SOURCE_REPO }}
+        ref: ${{ env.BRANCH_NAME }}
         path: android-kernel
       
     - name: Setup Build Environment
@@ -36,6 +86,7 @@ jobs:
         echo "CLANG_DIR=$CLANG_DIR" >> $GITHUB_ENV
       
     - name: Setup KernelSU
+      if: ${{ inputs.USE_KERNELSU }} == true
       run: |
         cd android-kernel
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
@@ -47,7 +98,7 @@ jobs:
         cd android-kernel
         PATH=${{ env.CLANG_DIR }}/bin:$PATH
         DEVICE_NAME=Munch
-        KERNEL_DEFCONFIG=munch_defconfig
+        KERNEL_DEFCONFIG=vendor/munch_defconfig
         KERNEL_DIR=`pwd`
         echo "KERNEL_DIR=${KERNEL_DIR}" >> $GITHUB_ENV
         echo "ZIMAGE_DIR="${KERNEL_DIR}/out/arch/arm64/boot"" >> $GITHUB_ENV
@@ -56,30 +107,40 @@ jobs:
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
         KBUILD_BUILD_HOST=GitHub-Action
         KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)
-        ######################
+
         cd $KERNEL_DIR/KernelSU
         KSU_VERSION=$((10000+200+`git rev-list --count HEAD`))
         cd $KERNEL_DIR
-        ######################
-        make CC=clang O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- NM=llvm-nm  OBJDUMP=llvm-objdump STRIP=llvm-strip $KERNEL_DEFCONFIG 
-        ######################
-        sed -i "/RealKing/{s/-/-${KSU_VERSION}-/}" out/.config
-        sed -i "/RealKing/{s/RealKing/RK-KSU/}" out/.config
-        KERNEL_NAME=`grep "RK-KSU" out/.config | sed 's|//|-|' | awk -F\" '{print $2}'`
-        echo "ZIMAGE_NAME=${KERNEL_NAME}-${DEVICE_NAME}-MIUI-Snapshot" >> $GITHUB_ENV
+
+        make ${{ env.DEF_CONFIG }} O=out CC=clang ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJDUMP=llvm-objdump STRIP=llvm-strip
+        
+        if ${{ inputs.USE_KERNELSU }} ; then
+          sed -i "/RealKing/{s/-/-${KSU_VERSION}-/}" out/.config
+          sed -i "/RealKing/{s/RealKing/RK-KSU/}" out/.config
+          KERNEL_NAME=`grep "RK-KSU" out/.config | sed 's|//|-|' | awk -F\" '{print $2}'`
+        else
+          KERNEL_NAME=`grep "RealKing" out/.config | sed 's|//|-|' | awk -F\" '{print $2}'`
+        fi
+        KERNEL_NAME=`echo ${KERNEL_NAME} | sed 's/~//g'`
+        if [ ${{ inputs.IS_RELEASE }} = true ] ; then
+          echo "ZIMAGE_NAME=${KERNEL_NAME}-${{ env.DEVICE_NAME }}-AOSP-Release" >> $GITHUB_ENV
+        else
+          echo "ZIMAGE_NAME=${KERNEL_NAME}-${{ env.DEVICE_NAME }}-AOSP-Snapshot" >> $GITHUB_ENV
+        fi
+        
         sed -i 's/# CONFIG_SECCOMP is not set/CONFIG_SECCOMP=y/' ./out/.config
+        
         
     - name: Build Kernel
       run: |
         cd android-kernel
         PATH=${{ env.CLANG_DIR }}/bin:$PATH
         clang -v
-        #MAKE="./makeparallel"
         SUBARCH=arm64
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
         KBUILD_BUILD_HOST=GitHub-Action
         KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)       
-        make -j$(nproc --all) CC=clang O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_COMPAT=arm-linux-gnueabi- NM=llvm-nm OBJDUMP=llvm-objdump STRIP=llvm-strip 
+        make -j$(nproc --all) O=out CC=clang ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJDUMP=llvm-objdump STRIP=llvm-strip
   
     - name: ZIP Kernel
       run: |
@@ -110,3 +171,4 @@ jobs:
 
     
           
+
