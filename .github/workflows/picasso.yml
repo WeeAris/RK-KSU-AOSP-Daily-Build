@@ -37,7 +37,7 @@ jobs:
     - name: Setup KernelSU
       run: |
         cd android-kernel
-        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
         
     - name: Build Kernel
       run: |
