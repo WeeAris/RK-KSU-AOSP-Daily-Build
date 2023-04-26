@@ -54,7 +54,7 @@ jobs:
             echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
             echo "DEF_CONFIG=alioth_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = munch ] ; then
-            echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
+            echo "BRANCH_NAME=munch" >> $GITHUB_ENV
             echo "DEVICE_NAME=Munch" >> $GITHUB_ENV
             echo "DEF_CONFIG=munch_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = apollo ] ; then
