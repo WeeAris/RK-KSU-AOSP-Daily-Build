@@ -34,7 +34,6 @@ jobs:
       run: |
         if [ ${{ inputs.IS_RELEASE }} = true ] ; then
           echo "SOURCE_REPO=WeeAris/Realking_imm_kernel_sm8250" >> $GITHUB_ENV
-          
           if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
             echo "BRANCH_NAME=alioth-imm" >> $GITHUB_ENV
             echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
@@ -49,7 +48,7 @@ jobs:
             echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
           fi
         else
-          echo "SOURCE_REPO=Rohail33/Realking_kernel_sm8250“ >> $GITHUB_ENV
+          echo "SOURCE_REPO=Rohail33/Realking_kernel_sm8250" >> $GITHUB_ENV
           if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
             echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
             echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
