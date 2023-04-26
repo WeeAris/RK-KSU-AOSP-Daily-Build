@@ -49,17 +49,19 @@ jobs:
             echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
           fi
         else
-          echo "SOURCE_REPO=Rohail33/Realking_kernel_sm8250" >> $GITHUB_ENV
-          echo "BRANCH_NAME=${{ inputs.DEVICE_CODE }}" >> $GITHUB_ENV
+          echo "SOURCE_REPO=Rohail33/Realking_xiaomi_sm8250" >> $GITHUB_ENV
           if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
+            echo "BRANCH_NAME=T" >> $GITHUB_ENV
             echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
-            echo "DEF_CONFIG=alioth_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=vendor/alioth_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = munch ] ; then
+            echo "BRANCH_NAME=munch" >> $GITHUB_ENV
             echo "DEVICE_NAME=Munch" >> $GITHUB_ENV
-            echo "DEF_CONFIG=munch_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=vendor/munch_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = apollo ] ; then
+            echo "BRANCH_NAME=apollo" >> $GITHUB_ENV
             echo "DEVICE_NAME=Apollo" >> $GITHUB_ENV
-            echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=vendor/apollo_defconfig" >> $GITHUB_ENV
           fi
         fi
         
@@ -97,8 +99,8 @@ jobs:
       run: |
         cd android-kernel
         PATH=${{ env.CLANG_DIR }}/bin:$PATH
-        DEVICE_NAME=Munch
-        KERNEL_DEFCONFIG=vendor/munch_defconfig
+        #DEVICE_NAME=${{ env.DEVICE_NAME }}
+        #KERNEL_DEFCONFIG=${{ env.DEF_CONFIG }}
         KERNEL_DIR=`pwd`
         echo "KERNEL_DIR=${KERNEL_DIR}" >> $GITHUB_ENV
         echo "ZIMAGE_DIR="${KERNEL_DIR}/out/arch/arm64/boot"" >> $GITHUB_ENV
