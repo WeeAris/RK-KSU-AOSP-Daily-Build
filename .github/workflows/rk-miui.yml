@@ -49,19 +49,19 @@ jobs:
             echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
           fi
         else
-          echo "SOURCE_REPO=Rohail33/Realking_xiaomi_sm8250" >> $GITHUB_ENV
+          echo "SOURCE_REPO=Rohail33/Realking_kernel_sm8250“ >> $GITHUB_ENV
           if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
-            echo "BRANCH_NAME=T" >> $GITHUB_ENV
+            echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
             echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
-            echo "DEF_CONFIG=vendor/alioth_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=alioth_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = munch ] ; then
-            echo "BRANCH_NAME=munch" >> $GITHUB_ENV
+            echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
             echo "DEVICE_NAME=Munch" >> $GITHUB_ENV
-            echo "DEF_CONFIG=vendor/munch_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=munch_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = apollo ] ; then
-            echo "BRANCH_NAME=apollo" >> $GITHUB_ENV
+            echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
             echo "DEVICE_NAME=Apollo" >> $GITHUB_ENV
-            echo "DEF_CONFIG=vendor/apollo_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
           fi
         fi
         
@@ -92,7 +92,7 @@ jobs:
       run: |
         cd android-kernel
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
-        wget -q "https://raw.githubusercontent.com/WeeAris/RK-KSU-AOSP-Daily-Build/main/0001-Add-KernelSU-calls-to-the-kernel-source.patch" -O KernelSU.patch
+        wget -q "https://raw.githubusercontent.com/WeeAris/RK-KSU-AOSP-Daily-Build/main/0001-readd-ksu-support-patch.patch" -O KernelSU.patch
         git apply ./KernelSU.patch
     
     - name: Generate Kernel Configuration
