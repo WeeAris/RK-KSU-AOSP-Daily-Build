@@ -39,8 +39,7 @@ jobs:
       run: |
         cd android-kernel
         #curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
-        cd KernelSU
-        git pull
+        git submodule update --remote
         
     - name: Build Kernel
       run: |
