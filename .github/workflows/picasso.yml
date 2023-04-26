@@ -19,6 +19,7 @@ jobs:
         github-server-url: 'https://github.com'
         repository: EndCredits/kernel_xiaomi_sm7250
         ref: android-4.19-main
+        submodules: true
         path: android-kernel
       
     - name: Setup Build Environment
