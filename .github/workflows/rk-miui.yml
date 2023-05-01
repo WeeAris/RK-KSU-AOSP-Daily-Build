@@ -48,19 +48,19 @@ jobs:
             echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
           fi
         else
-          echo "SOURCE_REPO=Rohail33/Realking_xiaomi_sm8250" >> $GITHUB_ENV
+          echo "SOURCE_REPO=Rohail33/Realking_kernel_sm8250" >> $GITHUB_ENV
           if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
-            echo "BRANCH_NAME=T" >> $GITHUB_ENV
+            echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
             echo "DEVICE_NAME=Alioth" >> $GITHUB_ENV
-            echo "DEF_CONFIG=vendor/alioth_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=alioth_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = munch ] ; then
-            echo "BRANCH_NAME=munch" >> $GITHUB_ENV
+            echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
             echo "DEVICE_NAME=Munch" >> $GITHUB_ENV
-            echo "DEF_CONFIG=vendor/munch_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=munch_defconfig" >> $GITHUB_ENV
           elif [ ${{ inputs.DEVICE_CODE }} = apollo ] ; then
-            echo "BRANCH_NAME=apollo" >> $GITHUB_ENV
+            echo "BRANCH_NAME=rebase3" >> $GITHUB_ENV
             echo "DEVICE_NAME=Apollo" >> $GITHUB_ENV
-            echo "DEF_CONFIG=vendor/apollo_defconfig" >> $GITHUB_ENV
+            echo "DEF_CONFIG=apollo_defconfig" >> $GITHUB_ENV
           fi
         fi
         
@@ -113,7 +113,7 @@ jobs:
         KSU_VERSION=$((10000+200+`git rev-list --count HEAD`))
         cd $KERNEL_DIR
 
-        make ${{ env.DEF_CONFIG }} O=out CC=clang ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm LLVM=1 LLVM_IAS=1
+        make ${{ env.DEF_CONFIG }} O=out CC=clang ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJDUMP=llvm-objdump STRIP=llvm-strip
         
         if ${{ inputs.USE_KERNELSU }} ; then
           sed -i "/RealKing/{s/-/-${KSU_VERSION}-/}" out/.config
@@ -141,7 +141,7 @@ jobs:
         KBUILD_COMPILER_STRING="$(clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')"
         KBUILD_BUILD_HOST=GitHub-Action
         KBUILD_BUILD_USER=$(echo ${{ github.actor }} | tr A-Z a-z)       
-        make -j$(nproc --all) O=out CC=clang ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm LLVM=1 LLVM_IAS=1
+        make -j$(nproc --all) O=out CC=clang ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- NM=llvm-nm OBJDUMP=llvm-objdump STRIP=llvm-strip
   
     - name: ZIP Kernel
       run: |
@@ -152,7 +152,15 @@ jobs:
         cp -fp ${{ env.ZIMAGE_DIR }}/Image.gz tmp
         cp -fp ${{ env.ZIMAGE_DIR }}/dtbo.img tmp
         cp -fp ${{ env.ZIMAGE_DIR }}/dtb tmp
-        cp -rp ./anykernel/* tmp
+        
+        if [ ${{ inputs.DEVICE_CODE }} = alioth ] ; then
+            cp -rp ./anykernel/* tmp
+          elif [ ${{ inputs.DEVICE_CODE }} = munch ] ; then
+            cp -rp ./anykernel3/* tmp
+          elif [ ${{ inputs.DEVICE_CODE }} = apollo ] ; then
+            cp -rp ./anykernel2/* tmp
+          fi
+          
         cd tmp
         7za a -mx9 tmp.zip *
         cd ..
